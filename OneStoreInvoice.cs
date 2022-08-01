@@ -20,21 +20,14 @@ namespace GCal_Invoicing
             }
 
             // create new invoice spreadsheet from template
-            var newSheet = new Google.Apis.Drive.v3.Data.File();
-            newSheet.Name = this.Number;
-            newSheet.Parents = new List<string> { "15jhiVeVDoiLzYWJgFQ3eea3J1ZVpJ-5q" };
-            string sheetsTemplateId = "1CRRWwcM3yj9c6f2o_KEdmwOux8jeKRqrzpWZ2SDGqtE";
-            Globals.driveService.Files.Copy(newSheet, sheetsTemplateId).Execute();
+            var sheet = CreateCopyFromTemplate("1CRRWwcM3yj9c6f2o_KEdmwOux8jeKRqrzpWZ2SDGqtE");
 
-            // update a value
-            String cell = "Invoice!B8";
-            var valueRange = new ValueRange();
-            var oblist = new List<object>() { this.Contact };
-            valueRange.Values = new List<IList<object>> { oblist };
-            var request = Globals.sheetsService.Spreadsheets.Values.Update(valueRange, newSheet.Id, cell);
-            request.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-            UpdateBandingRequest Val
-            
+            var recipient = new ValueRange() { Range = "Recipient" };
+            var data = new List<object>() { this.Contact };
+            recipient.Values = new List<IList<object>> { data };
+            var update = Globals.sheetsService.Spreadsheets.Values.Update(recipient, sheet.Id, recipient.Range);
+            update.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+            update.Execute();
         }
 
         public OneStoreInvoice(Shift shift) : base(shift)

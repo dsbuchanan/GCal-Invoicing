@@ -50,6 +50,14 @@ namespace GCal_Invoicing
             this.number = companyCodes[shifts[0].StoreCompany] + shifts[shifts.Count - 1].EndTime.Date.ToString("yyyyMMdd");
         }
 
+        protected Google.Apis.Drive.v3.Data.File CreateCopyFromTemplate(string templateId)
+        {
+            var templateCopy = new Google.Apis.Drive.v3.Data.File();
+            templateCopy.Name = this.number;
+            templateCopy.Parents = new List<string> { "15jhiVeVDoiLzYWJgFQ3eea3J1ZVpJ-5q" };
+            return Globals.driveService.Files.Copy(templateCopy, templateId).Execute();
+        }
+
         public abstract void Print();
 
         public Invoice(Shift shift)
