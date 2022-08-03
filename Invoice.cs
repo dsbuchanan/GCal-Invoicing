@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Google.Apis.Sheets.v4;
+using Google.Apis.Sheets.v4.Data;
+using Google.Apis.Download;
+using Google.Apis.Drive.v3;
+using Google.Apis.Services;
 
 namespace GCal_Invoicing
 {
     abstract class Invoice
     {
-        // all: invoice number, invoice date, bill to, shifts
-        // specific: location, create in sheets
+        // TODO: move these company codes to a company class
         private static Dictionary<string, string> companyCodes = new Dictionary<string, string>()
         {
             {"Bailey Nelson", "BN" },
@@ -18,7 +17,7 @@ namespace GCal_Invoicing
             {"Specsavers", "SS"}
 
         };
-        protected string number;
+        private string number;
         private DateTime date;
         private string contact;
         private List<Shift> shifts = new List<Shift>();
@@ -43,11 +42,16 @@ namespace GCal_Invoicing
             get { return shifts; }
         }
 
+        private void SetNumber()
+        {
+            this.number = companyCodes[shifts[0].StoreCompany] + shifts[shifts.Count - 1].EndTime.Date.ToString("yyyyMMdd");
+        }
+
         public void AddShift(Shift shift)
         {
             this.shifts.Add(shift);
             this.shifts.Sort((a, b) => a.EndTime.CompareTo(b.EndTime));
-            this.number = companyCodes[shifts[0].StoreCompany] + shifts[shifts.Count - 1].EndTime.Date.ToString("yyyyMMdd");
+            SetNumber();
         }
 
         protected Google.Apis.Drive.v3.Data.File CreateCopyFromTemplate(string templateId)
@@ -58,14 +62,66 @@ namespace GCal_Invoicing
             return Globals.driveService.Files.Copy(templateCopy, templateId).Execute();
         }
 
+        protected void UpdateNamedRange(string value, string namedRange, string id)
+        {
+            var update = Globals.sheetsService.Spreadsheets.Values.Update(
+                new ValueRange()
+                {
+                    Range = namedRange,
+                    Values = new List<IList<object>>
+                    {
+                        new List<object>()
+                        {
+                            value
+                        }
+                    }
+                },
+                id, namedRange);
+            update.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+            update.Execute();
+        }
+
+        protected void UpdateNamedRange(DateTime value, string namedRange, string id)
+        {
+            UpdateNamedRange(value.ToString("dd/MM/yyyy"), namedRange, id);
+        }
+
+        protected void UpdateNamedRange(List<IList<object>> data, string namedRange, string id)
+        {
+            var update = Globals.sheetsService.Spreadsheets.Values.Update(
+                new ValueRange()
+                {
+                    Range = namedRange,
+                    Values = data
+                },
+                id, namedRange); ;
+            update.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+            update.Execute();
+        }
+
+        protected void DownloadAsPDF(Google.Apis.Drive.v3.Data.File driveFile)
+        {
+            var request = Globals.driveService.Files.Export(driveFile.Id, "application/pdf");
+            var stream = new MemoryStream();
+            request.Download(stream);
+            using (var file = new FileStream(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+                    + "\\Optometry\\Locations and Invoices\\" + driveFile.Name + ".pdf",
+                FileMode.Create,
+                FileAccess.Write))
+            {
+                stream.WriteTo(file);
+            }
+
+        }
+
         public abstract void Print();
 
         public Invoice(Shift shift)
         {
             this.date = DateTime.Now.Date;
-            this.number = companyCodes[shift.StoreCompany] + shift.StartTime.Date.ToString("yyyyMMdd");
             this.contact = shift.Contact;
-            this.shifts.Add(shift);
+            AddShift(shift);
         }
     }
 }

@@ -66,7 +66,7 @@ namespace GCal_Invoicing
             get { return durationHours; }
         }
 
-        public void PrintShift()
+        public void Print()
         {
             //Console.WriteLine("Store Company: {0}, Name: {1}, Location: {2}", this.storeCompany,
             //    this.storeName, this.storeLocation);

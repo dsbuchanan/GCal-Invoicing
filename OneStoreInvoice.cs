@@ -1,33 +1,48 @@
-﻿using Google.Apis.Auth.OAuth2;
-// using Google.Apis.Drive.v3;
-using Google.Apis.Sheets.v4;
-using Google.Apis.Sheets.v4.Data;
-using Google.Apis.Services;
-using Google.Apis.Util.Store;
-using Newtonsoft.Json;
-
-namespace GCal_Invoicing
+﻿namespace GCal_Invoicing
 {
     internal class OneStoreInvoice : Invoice
     {
-        public override void Print()
+        private const string TemplateId = "1CRRWwcM3yj9c6f2o_KEdmwOux8jeKRqrzpWZ2SDGqtE";
+
+        public override async void Print()
         {
-            Console.WriteLine("Invoice number {0} for {1}: {2}", this.Number, this.Shifts[0].StoreCompany, this.Shifts[0].StoreName);
-            Console.WriteLine("Invoice to: {0}, invoice date: {1}", this.Contact, this.Date.Date);
-            foreach (var shift in this.Shifts)
+            // echo invoice data to console
+            Console.WriteLine("Invoice number {0} for {1}: {2}", Number, Shifts[0].StoreCompany, Shifts[0].StoreName);
+            Console.WriteLine("Invoice to: {0}, invoice date: {1}", Contact, Date.Date);
+            foreach (var shift in Shifts)
             {
-                shift.PrintShift();
+                shift.Print();
             }
 
-            // create new invoice spreadsheet from template
-            var sheet = CreateCopyFromTemplate("1CRRWwcM3yj9c6f2o_KEdmwOux8jeKRqrzpWZ2SDGqtE");
+            // create new Google sheet from template
+            var gsheet = CreateCopyFromTemplate(TemplateId);
 
-            var recipient = new ValueRange() { Range = "Recipient" };
-            var data = new List<object>() { this.Contact };
-            recipient.Values = new List<IList<object>> { data };
-            var update = Globals.sheetsService.Spreadsheets.Values.Update(recipient, sheet.Id, recipient.Range);
-            update.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-            update.Execute();
+            // insert single cell field data
+            UpdateNamedRange(Date, "InvoiceDate", gsheet.Id);
+            UpdateNamedRange(Number, "InvoiceNo", gsheet.Id);
+            UpdateNamedRange(Contact, "RecipientName", gsheet.Id);
+            UpdateNamedRange(Shifts[0].StoreLocation.Replace(", ", "\n"), "Recipient", gsheet.Id);
+            // insert shifts data
+            // TODO: implement limit on number of shifts per invoice
+            var shiftsData = new List<IList<object>> { };
+            foreach (var shift in Shifts)
+            {
+                var shiftData = new List<object>();
+                {
+                    shiftData.Add(shift.StartTime.ToString("dd/MM/yyyy"));
+                    shiftData.Add(shift.StoreName);
+                    shiftData.Add(shift.StartTime.ToString("HH:mm"));
+                    shiftData.Add(shift.EndTime.ToString("HH:mm"));
+                    shiftData.Add(shift.DurationHours);
+                    shiftData.Add("$" + shift.HourlyRate + "/hour");
+                    shiftData.Add(shift.DurationHours * shift.HourlyRate);
+                }
+                shiftsData.Add(shiftData);
+            }
+            UpdateNamedRange(shiftsData, "Shifts", gsheet.Id);
+
+            // download Google sheet as pdf
+            DownloadAsPDF(gsheet);
         }
 
         public OneStoreInvoice(Shift shift) : base(shift)
