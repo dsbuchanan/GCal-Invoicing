@@ -18,8 +18,6 @@ namespace GCal_Invoicing
         {
             // Get events
             EventsResource.ListRequest request = Globals.calService.Events.List("primary");
-            //Console.Write(Globals.StartDate.ToString() + ", ");
-            //Console.WriteLine(Globals.EndDate.ToString());
             request.TimeMin = Globals.StartDate;
             request.TimeMax = Globals.EndDate;
             request.ShowDeleted = false;
@@ -28,10 +26,9 @@ namespace GCal_Invoicing
             Events events = request.Execute();
 
             // Check for null
-            // Console.WriteLine("Upcoming events:");
             if (events.Items == null || events.Items.Count == 0)
             {
-                Console.WriteLine("No upcoming events found.");
+                Console.WriteLine("No shifts found on these dates");
                 return;
             }
             else
@@ -45,11 +42,6 @@ namespace GCal_Invoicing
                         i--;
                     }
                 }
-                // List events
-                //foreach (var ev in events.Items)
-                //{
-                //    Console.WriteLine("{0} ({1})", ev.Summary, ev.Start.DateTime.ToString());
-                //}
             }
             
             var shifts = new List<Shift>();
@@ -60,14 +52,14 @@ namespace GCal_Invoicing
 
             var invoices = new List<Invoice>();
 
-            // Medispecs and Bailey Nelson?
+            // Default (including Medispecs and Bailey Nelson)
             var result = shifts.Where(x => (x.StoreCompany == "Medispecs") || x.StoreCompany == "Bailey Nelson")
                                  .GroupBy(x => x.StoreCompany);
             if (result != null)
             {
                 foreach (var company in result)
                 {
-                    OneStoreInvoice invoice = new OneStoreInvoice(company.ElementAt(0));
+                    var invoice = new DefaultInvoice(company.ElementAt(0));
                     for (var i = 1; i < company.Count(); i++)
                     {
                         invoice.AddShift(company.ElementAt(i));
@@ -83,7 +75,7 @@ namespace GCal_Invoicing
             {
                 foreach (var storeweek in resultSS)
                 {
-                    OneStoreInvoice invoice = new OneStoreInvoice(storeweek.ElementAt(0));
+                    var invoice = new SpecsaversInvoice(storeweek.ElementAt(0));
                     for (var i = 1; i < storeweek.Count(); i++)
                     {
                         invoice.AddShift(storeweek.ElementAt(i));
@@ -99,7 +91,7 @@ namespace GCal_Invoicing
             {
                 foreach (var week in resultOW)
                 {
-                    OneStoreInvoice invoice = new OneStoreInvoice(week.ElementAt(0));
+                    var invoice = new OscarWyleeInvoice(week.ElementAt(0));
                     for (var i = 1; i < week.Count(); i++)
                     {
                         invoice.AddShift(week.ElementAt(i));
@@ -108,18 +100,15 @@ namespace GCal_Invoicing
                 }
             }
 
+            int invoiceCount = 1;
             foreach (var invoice in invoices)
             {
+                Console.WriteLine("Creating invoice {0} of {1}", invoiceCount, invoices.Count);
                 invoice.Print();
                 Console.WriteLine();
+                invoiceCount++;
             }
-            
-            /* OneStoreInvoice invoice = new OneStoreInvoice(new Shift(events.Items[0]));
-            for (var i = 1; i < events.Items.Count; i++)
-            {
-                invoice.AddShift(new Shift(events.Items[i]));
-            }
-            invoice.Print(); */
+
         }
         
         private void displayText_TextChanged(object sender, EventArgs e)
@@ -136,6 +125,17 @@ namespace GCal_Invoicing
         private void buttonClearLog_Click(object sender, EventArgs e)
         {
             displayText.Text = "";
+        }
+
+        private void downloadsEnabledCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (downloadsEnabledCheckBox.Checked)
+            {
+                Globals.downloadsEnabled = true;
+            } else
+            {
+                Globals.downloadsEnabled = false;
+            }
         }
     }
 }

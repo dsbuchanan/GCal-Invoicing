@@ -11,6 +11,10 @@ namespace GCal_Invoicing
 {
     static class Globals
     {
+        // debugging
+        public static bool downloadsEnabled = true;
+        
+        // Google API
         static string[] Scopes = { CalendarService.Scope.CalendarReadonly, SheetsService.Scope.Spreadsheets, DriveService.Scope.Drive };
         static string ApplicationName = "GCal-Invoicing";
         static UserCredential credential;
@@ -18,6 +22,8 @@ namespace GCal_Invoicing
         public static DriveService driveService;
         public static SheetsService sheetsService;
         public static List<string> validPractices;
+
+        // calendar date picker
         private static DateTime startDate = DateTime.Now.Date;
         private static DateTime endDate = DateTime.Now.Date + new TimeSpan(23, 59, 59);
 
@@ -32,6 +38,7 @@ namespace GCal_Invoicing
             get { return Globals.endDate; }
             set { Globals.endDate = value + new TimeSpan(23, 59, 59); }
         }
+
         static UserCredential GetCredential()
         {
             try

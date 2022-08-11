@@ -33,6 +33,7 @@
             this.labelStartDate = new System.Windows.Forms.Label();
             this.buttonGetShifts = new System.Windows.Forms.Button();
             this.buttonClearLog = new System.Windows.Forms.Button();
+            this.downloadsEnabledCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // displayText
@@ -83,11 +84,25 @@
             this.buttonClearLog.UseVisualStyleBackColor = true;
             this.buttonClearLog.Click += new System.EventHandler(this.buttonClearLog_Click);
             // 
+            // downloadsEnabledCheckBox
+            // 
+            this.downloadsEnabledCheckBox.AutoSize = true;
+            this.downloadsEnabledCheckBox.Checked = true;
+            this.downloadsEnabledCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.downloadsEnabledCheckBox.Location = new System.Drawing.Point(625, 12);
+            this.downloadsEnabledCheckBox.Name = "downloadsEnabledCheckBox";
+            this.downloadsEnabledCheckBox.Size = new System.Drawing.Size(163, 19);
+            this.downloadsEnabledCheckBox.TabIndex = 9;
+            this.downloadsEnabledCheckBox.Text = "Download as PDF enabled";
+            this.downloadsEnabledCheckBox.UseVisualStyleBackColor = true;
+            this.downloadsEnabledCheckBox.CheckedChanged += new System.EventHandler(this.downloadsEnabledCheckbox_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 625);
+            this.Controls.Add(this.downloadsEnabledCheckBox);
             this.Controls.Add(this.buttonClearLog);
             this.Controls.Add(this.buttonGetShifts);
             this.Controls.Add(this.labelStartDate);
@@ -106,5 +121,6 @@
         private Label labelStartDate;
         private Button buttonGetShifts;
         private Button buttonClearLog;
+        private CheckBox downloadsEnabledCheckBox;
     }
 }

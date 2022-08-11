@@ -68,10 +68,8 @@ namespace GCal_Invoicing
 
         public void Print()
         {
-            //Console.WriteLine("Store Company: {0}, Name: {1}, Location: {2}", this.storeCompany,
-            //    this.storeName, this.storeLocation);
             Console.WriteLine("Location: {0}, Start: {1}, End: {2}, Lunch mins: {3}, Dur hours: {4}, Hourly rate: {5}, WOY: {6}",
-                this.storeName, this.startTime, this.endTime, this.lunchMinutes, this.durationHours, this.hourlyRate, this.weekOfYear);
+                storeName, startTime, endTime, lunchMinutes, durationHours, hourlyRate, weekOfYear);
         }
 
         private int GetThisWeekOfYear(DateTime time)
@@ -86,19 +84,19 @@ namespace GCal_Invoicing
 
         public Shift(Event ev)
         {
-            this.storeCompany = ev.Summary.Substring(0, ev.Summary.IndexOf(':')).Trim();
-            this.storeName = ev.Summary.Substring(ev.Summary.IndexOf(':') + 1).Trim();
-            this.storeLocation = ev.Location;
-            this.startTime = (DateTime) ev.Start.DateTime;
-            this.endTime = (DateTime) ev.End.DateTime;
-            this.weekOfYear = GetThisWeekOfYear(this.startTime);
+            storeCompany = ev.Summary.Substring(0, ev.Summary.IndexOf(':')).Trim();
+            storeName = ev.Summary.Substring(ev.Summary.IndexOf(':') + 1).Trim();
+            storeLocation = ev.Location;
+            startTime = (DateTime) ev.Start.DateTime;
+            endTime = (DateTime) ev.End.DateTime;
+            weekOfYear = GetThisWeekOfYear(startTime);
             string[] lines = ev.Description.Replace("<br>", "\n").Split("\n");
-            this.contact = lines[ContactLine].Substring(lines[ContactLine].IndexOf(':') + 1).Trim();
-            this.hourlyRate = Convert.ToDouble(lines[RateLine].Substring(lines[RateLine].IndexOf('$') + 1, 
+            contact = lines[ContactLine].Substring(lines[ContactLine].IndexOf(':') + 1).Trim();
+            hourlyRate = Convert.ToDouble(lines[RateLine].Substring(lines[RateLine].IndexOf('$') + 1, 
                 lines[RateLine].IndexOf('/') - lines[RateLine].IndexOf('$') - 1));
-            this.lunchMinutes = Convert.ToInt32(lines[LunchLine].Substring(lines[LunchLine].IndexOf(':') + 1,
+            lunchMinutes = Convert.ToInt32(lines[LunchLine].Substring(lines[LunchLine].IndexOf(':') + 1,
                 lines[LunchLine].IndexOf('m') - lines[LunchLine].IndexOf(':') - 1).Trim());
-            this.durationHours = (this.endTime.Subtract(this.startTime).TotalMinutes - this.lunchMinutes) / 60;
+            durationHours = (endTime.Subtract(startTime).TotalMinutes - lunchMinutes) / 60;
         }
     }
 }

@@ -26,7 +26,7 @@ namespace GCal_Invoicing
         {
             get { return number; }
         }
-        
+
         public DateTime Date
         {
             get { return date; }
@@ -44,20 +44,20 @@ namespace GCal_Invoicing
 
         private void SetNumber()
         {
-            this.number = companyCodes[shifts[0].StoreCompany] + shifts[shifts.Count - 1].EndTime.Date.ToString("yyyyMMdd");
+            number = companyCodes[shifts[0].StoreCompany] + shifts[shifts.Count - 1].EndTime.Date.ToString("yyyyMMdd");
         }
 
         public void AddShift(Shift shift)
         {
-            this.shifts.Add(shift);
-            this.shifts.Sort((a, b) => a.EndTime.CompareTo(b.EndTime));
+            shifts.Add(shift);
+            shifts.Sort((a, b) => a.EndTime.CompareTo(b.EndTime));
             SetNumber();
         }
 
         protected Google.Apis.Drive.v3.Data.File CreateCopyFromTemplate(string templateId)
         {
             var templateCopy = new Google.Apis.Drive.v3.Data.File();
-            templateCopy.Name = this.number;
+            templateCopy.Name = number;
             templateCopy.Parents = new List<string> { "15jhiVeVDoiLzYWJgFQ3eea3J1ZVpJ-5q" };
             return Globals.driveService.Files.Copy(templateCopy, templateId).Execute();
         }
@@ -101,6 +101,10 @@ namespace GCal_Invoicing
 
         protected void DownloadAsPDF(Google.Apis.Drive.v3.Data.File driveFile)
         {
+            if (!Globals.downloadsEnabled)
+            {
+                return;
+            }
             var request = Globals.driveService.Files.Export(driveFile.Id, "application/pdf");
             var stream = new MemoryStream();
             request.Download(stream);
@@ -115,12 +119,22 @@ namespace GCal_Invoicing
 
         }
 
+        protected void ConsolePrint()
+        {
+            Console.WriteLine("Invoice number {0} for {1}: {2}", Number, Shifts[0].StoreCompany, Shifts[0].StoreName);
+            Console.WriteLine("Invoice date: {0}", Date.ToString("dd/MM/yyyy"));
+            foreach (var shift in Shifts)
+            {
+                shift.Print();
+            }
+        }
+
         public abstract void Print();
 
         public Invoice(Shift shift)
         {
-            this.date = DateTime.Now.Date;
-            this.contact = shift.Contact;
+            date = DateTime.Now.Date;
+            contact = shift.Contact;
             AddShift(shift);
         }
     }
