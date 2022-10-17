@@ -16,6 +16,12 @@ namespace GCal_Invoicing
 
         private void buttonGetShifts_Click(object sender, EventArgs e)
         {
+            displayText.Text = "";
+
+            if (Globals.calService == null) {
+                Globals.RetryCred();
+            }
+
             // Get events
             EventsResource.ListRequest request = Globals.calService.Events.List("primary");
             request.TimeMin = Globals.StartDate;
@@ -23,12 +29,23 @@ namespace GCal_Invoicing
             request.ShowDeleted = false;
             request.SingleEvents = true;
             request.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;
-            Events events = request.Execute();
+            Events events = new Events();
+            try
+            {
+                events = request.Execute();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
 
             // Check for null
             if (events.Items == null || events.Items.Count == 0)
             {
                 Console.WriteLine("No shifts found on these dates");
+                invoiceCheckedListBox.Items.Clear();
+                buttonCreateInvoices.Enabled = false;
                 return;
             }
             else
@@ -43,14 +60,16 @@ namespace GCal_Invoicing
                     }
                 }
             }
-            
+
             var shifts = new List<Shift>();
             foreach (var ev in events.Items)
             {
                 shifts.Add(new Shift(ev));
             }
 
-            var invoices = new List<Invoice>();
+            // Create invoices
+            Globals.invoices.Clear();
+            buttonCreateInvoices.Enabled = true;
 
             // Default (including Medispecs and Bailey Nelson)
             var result = shifts.Where(x => (x.StoreCompany == "Medispecs") || x.StoreCompany == "Bailey Nelson")
@@ -64,7 +83,7 @@ namespace GCal_Invoicing
                     {
                         invoice.AddShift(company.ElementAt(i));
                     }
-                    invoices.Add(invoice);
+                    Globals.invoices.Add(invoice);
                 }
             }
 
@@ -80,7 +99,7 @@ namespace GCal_Invoicing
                     {
                         invoice.AddShift(storeweek.ElementAt(i));
                     }
-                    invoices.Add(invoice);
+                    Globals.invoices.Add(invoice);
                 }
             }
 
@@ -96,21 +115,59 @@ namespace GCal_Invoicing
                     {
                         invoice.AddShift(week.ElementAt(i));
                     }
-                    invoices.Add(invoice);
+                    Globals.invoices.Add(invoice);
                 }
             }
 
-            int invoiceCount = 1;
-            foreach (var invoice in invoices)
+            // CheckedListBox stuff            
+            invoiceCheckedListBox.Items.Clear();
+
+            var invoiceNameList = new List<string>();
+            foreach (var invoice in Globals.invoices)
             {
-                Console.WriteLine("Creating invoice {0} of {1}", invoiceCount, invoices.Count);
-                invoice.Print();
+                invoiceNameList.Add(
+                    invoice.Number + " " +
+                    invoice.Shifts[0].StoreCompany + ": " +
+                    invoice.Shifts[0].StoreName + ": " +
+                    invoice.Shifts.Count() + " shift(s)"
+                );
+                invoice.ConsolePrint();
                 Console.WriteLine();
-                invoiceCount++;
             }
 
+            invoiceCheckedListBox.Items.AddRange(invoiceNameList.ToArray());
+            for (var i = 0; i < invoiceCheckedListBox.Items.Count; i++)
+            {
+                invoiceCheckedListBox.SetItemChecked(i, true);
+            }
         }
-        
+
+        private void buttonCreateInvoices_Click(object sender, EventArgs e)
+        {
+            displayText.Text = "";
+            buttonGetInvoices.Enabled = false;
+            buttonCreateInvoices.Enabled = false;
+            int count = 0;
+            for (var i = 0; i < Globals.invoices.Count; i++)
+            {
+                if (invoiceCheckedListBox.GetItemChecked(i))
+                {
+                    count++;
+                    Console.WriteLine("Creating invoice {0} of {1}", count, invoiceCheckedListBox.CheckedItems.Count);
+                    Console.WriteLine("{0} {1}: {2}",
+                        Globals.invoices[i].Number,
+                        Globals.invoices[i].Shifts[0].StoreCompany,
+                        Globals.invoices[i].Shifts[0].StoreName
+                    );
+                    Globals.invoices[i].Print();
+                    Console.WriteLine();
+                }
+            }
+            Console.WriteLine("Done.");
+            buttonGetInvoices.Enabled = true;
+            buttonCreateInvoices.Enabled = true;
+        }
+
         private void displayText_TextChanged(object sender, EventArgs e)
         {
             displayText.SelectionStart = displayText.TextLength;

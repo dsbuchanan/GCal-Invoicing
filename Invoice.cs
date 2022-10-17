@@ -119,14 +119,16 @@ namespace GCal_Invoicing
 
         }
 
-        protected void ConsolePrint()
+        public void ConsolePrint()
         {
-            Console.WriteLine("Invoice number {0} for {1}: {2}", Number, Shifts[0].StoreCompany, Shifts[0].StoreName);
-            Console.WriteLine("Invoice date: {0}", Date.ToString("dd/MM/yyyy"));
+            Console.WriteLine("{0} {1}: {2}", Number, Shifts[0].StoreCompany, Shifts[0].StoreName);
+            double total = 0;
             foreach (var shift in Shifts)
             {
                 shift.Print();
+                total += shift.DurationHours * shift.HourlyRate;
             }
+            Console.WriteLine("Invoice total: {0:C2}", total * 1.1);
         }
 
         public abstract void Print();

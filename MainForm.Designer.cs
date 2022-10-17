@@ -31,9 +31,11 @@
             this.displayText = new System.Windows.Forms.TextBox();
             this.monthCalendarDates = new System.Windows.Forms.MonthCalendar();
             this.labelStartDate = new System.Windows.Forms.Label();
-            this.buttonGetShifts = new System.Windows.Forms.Button();
+            this.buttonGetInvoices = new System.Windows.Forms.Button();
             this.buttonClearLog = new System.Windows.Forms.Button();
             this.downloadsEnabledCheckBox = new System.Windows.Forms.CheckBox();
+            this.invoiceCheckedListBox = new System.Windows.Forms.CheckedListBox();
+            this.buttonCreateInvoices = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // displayText
@@ -43,7 +45,7 @@
             this.displayText.Name = "displayText";
             this.displayText.ReadOnly = true;
             this.displayText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.displayText.Size = new System.Drawing.Size(776, 385);
+            this.displayText.Size = new System.Drawing.Size(776, 350);
             this.displayText.TabIndex = 2;
             this.displayText.TextChanged += new System.EventHandler(this.displayText_TextChanged);
             // 
@@ -64,19 +66,19 @@
             this.labelStartDate.TabIndex = 4;
             this.labelStartDate.Text = "Select dates:";
             // 
-            // buttonGetShifts
+            // buttonGetInvoices
             // 
-            this.buttonGetShifts.Location = new System.Drawing.Point(251, 33);
-            this.buttonGetShifts.Name = "buttonGetShifts";
-            this.buttonGetShifts.Size = new System.Drawing.Size(75, 23);
-            this.buttonGetShifts.TabIndex = 7;
-            this.buttonGetShifts.Text = "Get Shifts";
-            this.buttonGetShifts.UseVisualStyleBackColor = true;
-            this.buttonGetShifts.Click += new System.EventHandler(this.buttonGetShifts_Click);
+            this.buttonGetInvoices.Location = new System.Drawing.Point(244, 33);
+            this.buttonGetInvoices.Name = "buttonGetInvoices";
+            this.buttonGetInvoices.Size = new System.Drawing.Size(75, 40);
+            this.buttonGetInvoices.TabIndex = 7;
+            this.buttonGetInvoices.Text = "Get Invoices";
+            this.buttonGetInvoices.UseVisualStyleBackColor = true;
+            this.buttonGetInvoices.Click += new System.EventHandler(this.buttonGetShifts_Click);
             // 
             // buttonClearLog
             // 
-            this.buttonClearLog.Location = new System.Drawing.Point(713, 198);
+            this.buttonClearLog.Location = new System.Drawing.Point(713, 583);
             this.buttonClearLog.Name = "buttonClearLog";
             this.buttonClearLog.Size = new System.Drawing.Size(75, 23);
             this.buttonClearLog.TabIndex = 8;
@@ -97,14 +99,36 @@
             this.downloadsEnabledCheckBox.UseVisualStyleBackColor = true;
             this.downloadsEnabledCheckBox.CheckedChanged += new System.EventHandler(this.downloadsEnabledCheckbox_CheckedChanged);
             // 
+            // invoiceCheckedListBox
+            // 
+            this.invoiceCheckedListBox.CheckOnClick = true;
+            this.invoiceCheckedListBox.FormattingEnabled = true;
+            this.invoiceCheckedListBox.Location = new System.Drawing.Point(360, 33);
+            this.invoiceCheckedListBox.Name = "invoiceCheckedListBox";
+            this.invoiceCheckedListBox.Size = new System.Drawing.Size(347, 166);
+            this.invoiceCheckedListBox.TabIndex = 10;
+            // 
+            // buttonCreateInvoices
+            // 
+            this.buttonCreateInvoices.Enabled = false;
+            this.buttonCreateInvoices.Location = new System.Drawing.Point(713, 33);
+            this.buttonCreateInvoices.Name = "buttonCreateInvoices";
+            this.buttonCreateInvoices.Size = new System.Drawing.Size(75, 40);
+            this.buttonCreateInvoices.TabIndex = 11;
+            this.buttonCreateInvoices.Text = "Create Invoices";
+            this.buttonCreateInvoices.UseVisualStyleBackColor = true;
+            this.buttonCreateInvoices.Click += new System.EventHandler(this.buttonCreateInvoices_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 625);
+            this.Controls.Add(this.buttonCreateInvoices);
+            this.Controls.Add(this.invoiceCheckedListBox);
             this.Controls.Add(this.downloadsEnabledCheckBox);
             this.Controls.Add(this.buttonClearLog);
-            this.Controls.Add(this.buttonGetShifts);
+            this.Controls.Add(this.buttonGetInvoices);
             this.Controls.Add(this.labelStartDate);
             this.Controls.Add(this.monthCalendarDates);
             this.Controls.Add(this.displayText);
@@ -119,8 +143,10 @@
         private TextBox displayText;
         private MonthCalendar monthCalendarDates;
         private Label labelStartDate;
-        private Button buttonGetShifts;
+        private Button buttonGetInvoices;
         private Button buttonClearLog;
         private CheckBox downloadsEnabledCheckBox;
+        private CheckedListBox invoiceCheckedListBox;
+        private Button buttonCreateInvoices;
     }
 }

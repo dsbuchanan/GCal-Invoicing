@@ -68,8 +68,15 @@ namespace GCal_Invoicing
 
         public void Print()
         {
-            Console.WriteLine("Location: {0}, Start: {1}, End: {2}, Lunch mins: {3}, Dur hours: {4}, Hourly rate: {5}, WOY: {6}",
-                storeName, startTime, endTime, lunchMinutes, durationHours, hourlyRate, weekOfYear);
+            Console.WriteLine("{0}: {1}, {2} to {3} ({4:F2} hours), ${5}/hour, {6:C2} (+{7:C2}GST)",
+                startTime.ToString("dd/MM/yyyy"),
+                storeName,
+                startTime.ToString("HH:mm"),
+                endTime.ToString("HH:mm"),
+                durationHours,
+                hourlyRate,
+                durationHours * hourlyRate,
+                durationHours * hourlyRate / 10);
         }
 
         private int GetThisWeekOfYear(DateTime time)

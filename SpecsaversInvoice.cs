@@ -6,9 +6,6 @@
 
         public override void Print()
         {
-            // echo invoice data to console
-            ConsolePrint();
-
             // create new Google sheet from template
             var gsheet = CreateCopyFromTemplate(TemplateId);
 

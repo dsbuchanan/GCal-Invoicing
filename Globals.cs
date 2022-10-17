@@ -21,11 +21,12 @@ namespace GCal_Invoicing
         public static CalendarService calService;
         public static DriveService driveService;
         public static SheetsService sheetsService;
-        public static List<string> validPractices;
 
-        // calendar date picker
+        // form globals
         private static DateTime startDate = DateTime.Now.Date;
         private static DateTime endDate = DateTime.Now.Date + new TimeSpan(23, 59, 59);
+        public static List<Invoice> invoices;
+        public static List<string> validPractices;
 
         public static DateTime StartDate
         {
@@ -39,7 +40,7 @@ namespace GCal_Invoicing
             set { Globals.endDate = value + new TimeSpan(23, 59, 59); }
         }
 
-        static UserCredential GetCredential()
+        private static UserCredential GetCredential()
         {
             try
             {
@@ -63,7 +64,7 @@ namespace GCal_Invoicing
             }
         }
         
-        static List<string> GetPractices()
+        private static List<string> GetPractices()
         {
             try
             {
@@ -76,7 +77,7 @@ namespace GCal_Invoicing
             }
         }
 
-        static Globals()
+        private static void Init()
         {
             credential = GetCredential();
             calService = new CalendarService(new BaseClientService.Initializer
@@ -94,7 +95,18 @@ namespace GCal_Invoicing
                 HttpClientInitializer = credential,
                 ApplicationName = ApplicationName
             });
+            invoices = new List<Invoice>();
             validPractices = GetPractices();
+        }
+
+        public static void RetryCred()
+        {
+            Init();
+        }
+
+        static Globals()
+        {
+            Init();
         }
     }
 }
